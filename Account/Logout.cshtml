@@ -1,0 +1,23 @@
+﻿@{
+    var username = Request["login_username"];
+
+    if( username != null ) {
+        var db = Database.Open( "Testsite" );
+        var query = "UPDATE Users SET LoggedIn = @0 WHERE Username = @1";
+        db.Execute( query, false, username );
+    }
+
+    Response.Redirect( "~/Default.cshtml" );
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+    </head>
+    <body>
+        
+    </body>
+</html>

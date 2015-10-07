@@ -1,0 +1,33 @@
+﻿@{
+    var username = Request["username"];
+    
+    if( username == null ) {
+        Response.Redirect( "~/Default.cshtml" );
+    }
+
+    var db = Database.Open( "Testsite" );
+    var query = "SELECT LoggedIn from Users WHERE Username=@0";
+    var row = db.QuerySingle( query, username );
+
+    if( row == null || !row.loggedIn ) {
+        //Set error message
+        Response.Redirect( "~/Default.cshtml" );
+    } 
+
+    var id = Request["id"];
+
+    query = "DELETE FROM StarredFeeds WHERE username=@0 AND id=@1";
+    db.Execute( query, username, id );
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+    </head>
+    <body>
+        
+    </body>
+</html>

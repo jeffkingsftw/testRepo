@@ -1,0 +1,103 @@
+﻿@{
+    var username = Request["login_username"];
+    
+    if( username == null ) {
+        Response.Redirect( "~/Default.cshtml" );
+    }
+
+    var db = Database.Open( "Testsite" );
+    var query = "SELECT LoggedIn from Users WHERE Username=@0";
+    var row = db.QuerySingle( query, username );
+
+    if( row == null || !row.loggedIn ) {
+        //Set error message
+        Response.Redirect( "~/Default.cshtml" );
+    }  
+
+    query = "SELECT id FROM StarredFeeds WHERE Username=@0";
+    var ids = db.Query( query, username );
+}
+
+<!DOCTYPE html>
+<link rel="stylesheet" href="~/Content/main.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-route.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-resource.js"></script>
+<script src="~/Scripts/app.js"></script>
+<script src="~/Scripts/modelFeed.js"></script>
+<script src="~/Scripts/controllers.js"></script>
+<script src="~/Scripts/services.js"></script>
+<script src="~/Scripts/filters.js"></script>
+
+<html lang="en" ng-app="testSite">
+    <head>
+        <script>
+            var ids = new Array();
+            @foreach( var id in ids ) {
+                <text>
+                ids.push( '@id.id' );
+                </text>
+            }
+            app.value( "ids", ids );
+        </script>
+        <meta charset="utf-8" />
+        <title></title>
+    </head>
+
+    <body ng-controller="mainController">
+        <div id="header">
+            <a class="navigateLink" href="@Href("~/Account/StarredFeeds.cshtml?login_username=" + username)">View starred feeds</a>
+            <a class="logoutLink" href="@Href("~/Account/Logout.cshtml?login_username=" + username)">Logout</a>
+        </div>
+
+        <div class="content">
+        <div id="hot" class="feedList">
+            <div class="feedsTitle">Hot Feeds</div>
+
+            <button ng-disabled="currentHotPage == 0" ng-click="currentHotPage=currentHotPage-1">Previous</button>
+            {{currentHotPage+1}}/{{numberOfPages( getHotLength() )}}
+            <button ng-disabled="currentHotPage >= getHotLength()/pageSize - 1" ng-click="currentHotPage=currentHotPage+1">Next</button>
+
+            <div class="feeds">
+            <div class="feed" ng-repeat="feed in hotList.getData( ids ) | startFrom:currentHotPage*pageSize | limitTo:pageSize">
+                <span class="media">
+                    <span id="star{{feed.id}}" class="star fa {{feed.isStarred ? 'fa-star starred' : 'fa-star-o'}}" ng-click="onStarClicked(feed.isStarred ? 'RemoveStar' : 'SetStar', feed.id, feed.title, feed.link, feed.numComments, feed.media, '@username' )"></span>
+                    <img ng-if="feed.media" src="{{feed.media}}" border="0" />
+                </span>
+                <div class="feedTitle"><a href="{{feed.link}}" title="{{feed.title}}">{{feed.title}}</a></div>
+                <div><label>Number of comments:</label><span>{{feed.numComments}}</span></div>
+            </div>
+            </div>
+
+            <button ng-disabled="currentHotPage == 0" ng-click="currentHotPage=currentHotPage-1">Previous</button>
+            {{currentHotPage+1}}/{{numberOfPages( getHotLength() )}}
+            <button ng-disabled="currentHotPage >= getHotLength()/pageSize - 1" ng-click="currentHotPage=currentHotPage+1">Next</button>
+        </div>
+
+        <div id="top" class="feedList">
+            <div class="feedsTitle">Top Feeds</div>
+
+            <button ng-disabled="currentTopPage == 0" ng-click="currentTopPage=currentTopPage-1">Previous</button>
+            {{currentTopPage+1}}/{{numberOfPages( getTopLength() )}}
+            <button ng-disabled="currentTopPage >= getTopLength()/pageSize - 1" ng-click="currentTopPage=currentTopPage+1">Next</button>
+
+            <div class="feeds">
+            <div class="feed" ng-repeat="feed in topList.getData() | startFrom:currentTopPage*pageSize | limitTo:pageSize">
+                <span class="media">
+                    <span id="star{{feed.id}}" class="star fa {{feed.isStarred ? 'fa-star starred' : 'fa-star-o'}}" ng-click="onStarClicked( feed.isStarred ? 'RemoveStar' : 'SetStar', feed.id, feed.title, feed.link, feed.numComments, feed.media, '@username' )"></span>
+                    <img ng-if="feed.media" src="{{feed.media}}" />
+                </span>
+                <div class="feedTitle"><a href="{{feed.link}}" title="{{feed.title}}">{{feed.title}}</a></div>
+                <div><label>Number of comments:</label><span>{{feed.numComments}}</span></div>
+            </div>
+            </div>
+
+            <button ng-disabled="currentTopPage == 0" ng-click="currentTopPage=currentTopPage-1">Previous</button>
+            {{currentTopPage+1}}/{{numberOfPages( getTopLength() )}}
+            <button ng-disabled="currentTopPage >= getTopLength()/pageSize - 1" ng-click="currentTopPage=currentTopPage+1">Next</button>
+        </div>
+        </div>
+
+    </body>
+</html>

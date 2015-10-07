@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+@{
+    var loginErrorMessage = "";
+    if( Request["loginErrorMessage"] != null ) {
+        loginErrorMessage = Request["loginErrorMessage"];
+    }
+
+    var registerErrorMessage = "";
+    if( Request["registerErrorMessage"] != null ) {
+        registerErrorMessage = Request["registerErrorMessage"];
+    }
+
+    var usernameErrorMessage = "";
+    if( Request["usernameErrorMessage"] != null ) {
+        usernameErrorMessage = Request["usernameErrorMessage"];
+    }
+
+    if( Request["Submit"] == "Login" ) {
+        var username = Request["login_username"];
+        var password = Request["login_password"];
+
+        if( username == null || password == null ) {
+            Response.Redirect( "~/Default.cshtml" );
+        }
+
+        var db = Database.Open( "Testsite" );
+        var query = "SELECT Username from Users WHERE Username=@0 AND Password=@1";
+        var row = db.QuerySingle( query, username, password );
+
+        if( row == null || username != row.Username ) {
+            loginErrorMessage = "Either the Username or Password was incorrect.";
+            Response.Redirect( "~/Default.cshtml?loginErrorMessage=" + loginErrorMessage );
+        }        
+
+        query = "UPDATE Users SET LoggedIn = @0 WHERE Username = @1";
+        db.Execute( query, true, username );
+
+        Response.Redirect( "~/Account/Feeds?login_username=" + username );
+    } else if( Request["Submit"] == "Register" ) {
+        var username = Request["register_username"];
+        var password = Request["register_password"];
+        var passwordVerify = Request["register_reenter_password"];
+
+        if( password != passwordVerify ) {
+            registerErrorMessage = "Passwords do not match";
+            Response.Redirect( "~/Default.cshtml?registerError=" + registerErrorMessage );
+        }
+        
+        var db = Database.Open( "Testsite" );
+        var query = "SELECT Username FROM Users WHERE Username=@0";
+        var row = db.Query( query, username );
+
+        if( row != null ) {
+            usernameErrorMessage = "That username already exist.";
+            Response.Redirect( "~/Default.cshtml?usernameErrorMessage=" + usernameErrorMessage );
+        }
+        
+        query = "INSERT INTO Users (Username, Password, LoggedIn ) VALUES (@0, @1, @2 )";
+        db.Execute(query, username, password, true );
+
+        Response.Redirect( "~/Account/Feeds?login_username=" + username );
+    }
+
+    
+}
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="Content/main.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script>
+            function verifyPassword() {
+                var firstPass = document.getElementById('register_password').value;
+                var secondPass = document.getElementById('register_reenter_password').value;
+                if (firstPass != secondPass) {
+                    document.getElementById('noMatchError').innerHTML = "Passwords do not match.";
+                } else {
+                    document.getElementById('noMatchError').innerHTML = "";
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div id="logo" class="logoArea">
+                        <div id="logoTitle"></div>
+                        <div id="logoImage"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div id="loginCarousel" class="carousel slide">
+                        <div class="loginButtons">
+                            <span class="loginControl col-sm-6"><a class="carousel-control" href="#loginCarousel" data-slide-to="0">Login</a></span>
+                            <span class="loginControl col-sm-6"><a class="carousel-control" href="#loginCarousel" data-slide-to="1">Register</a></span>
+                        </div>
+                        <div class="carousel-inner" role="form">
+                            <div class="item @if( usernameErrorMessage == "" && registerErrorMessage == "" ) { <text>active</text> }">
+                                <form id="login-form" class="form-horizontal" role="form" runat="server">
+		                            <div class="form-group">
+				    		            <label class="control-label col-sm-4" for="login_username">Username:</label>
+                                        <div class="col-sm-8">
+				    		                <input name="login_username" id="login_username" class="form-control" type="text" placeholder="Username" required>
+                                            <span class="error">@loginErrorMessage</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+				    		            <label class="control-label col-sm-4" for="login_password">Password:</label>
+                                        <div class="col-sm-8">
+                                            <input id="login_password" name="login_password" class="form-control" type="password" placeholder="Password" required>                            
+                                        </div>
+        		    	            </div>
+				                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-5">
+                                            <button type="submit" class="btn btn-default" name="Submit" value="Login">Login</button>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            
+                                        </div>
+				                    </div>
+                                </form>
+                            </div>
+                            <div class="item @if( usernameErrorMessage != "" || registerErrorMessage != "" ) { <text>active</text> }">
+                                <form id="register-form" class="form-horizontal" role="form">
+		                            <div class="form-group">
+				    		            <label class="control-label col-sm-4" for="register_username">Username:</label>
+                                        <div class="col-sm-8">
+				    		                <input id="register_username" name="register_username" class="form-control" type="text" placeholder="Username" required>
+                                            <span class="error">@usernameErrorMessage</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+				    		            <label class="control-label col-sm-4" for="register_password">Password:</label>
+                                        <div class="col-sm-8">
+                                            <input id="register_password" name="register_password" class="form-control" type="password" placeholder="Password" required>                            
+                                        </div>
+        		    	            </div>
+                                    <div class="form-group">
+				    		            <label class="control-label col-sm-4" for="register_reenter_password">Re-enter Password:</label>
+                                        <div class="col-sm-8">
+                                            <input id="register_reenter_password" name="register_reenter_password" class="form-control" type="password" placeholder="Re-enter Password" onblur="verifyPassword()" required>
+                                            <span id="noMatchError" class="error">@registerErrorMessage</span>                            
+                                        </div>
+        		    	            </div>
+				                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-5">
+                                            <input id="registerSubmit" action="Default.cshtml" type="submit" class="btn btn-default" name="Submit" value="Register" />
+                                        </div>
+                                        <div class="col-sm-5">
+                                            
+                                        </div>
+				                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="carousel">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

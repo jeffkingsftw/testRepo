@@ -1,0 +1,82 @@
+﻿@{
+    var username = Request["login_username"];
+    
+    if( username == null ) {
+        Response.Redirect( "~/Default.cshtml" );
+    }
+
+    var db = Database.Open( "Testsite" );
+    var query = "SELECT LoggedIn from Users WHERE Username=@0";
+    var row = db.QuerySingle( query, username );
+
+    if( row == null || !row.loggedIn ) {
+        //Set error message
+        Response.Redirect( "~/Default.cshtml" );
+    }
+
+    query = "SELECT id, link, title, numComments, media FROM StarredFeeds WHERE Username=@0";
+    var rows = db.Query( query, username );
+
+    if( rows == null ) {
+        Response.Redirect( "~/Account/Feeds.cshtml" );
+    }
+}
+
+<!DOCTYPE html>
+<link rel="stylesheet" href="~/Content/main.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
+
+<script>
+    function toggleStar( element, id, title, link, numComments, media ) {
+        var url;
+        var params = "?username=" + "@username" + "&id=" + id;
+        var xhttp = new XMLHttpRequest();
+
+        if( element.classList.contains( "starred" ) ) {
+            url = "@Href("~/Account/RemoveStar.cshtml" )";
+
+            element.classList.remove( "starred" );
+            element.classList.remove( "fa-star" );
+            element.classList.add( "fa-star-o" );
+        } else {
+            params += "&title=" + title + "&link=" + link + "&numComments=" + numComments + "&media=" + media;
+            url =  "@Href("~/Account/SetStar.cshtml" )";
+
+            element.classList.remove( "fa-star-o" );
+            element.classList.add( "fa-star" );
+            element.classList.add( "starred" );
+        }   
+        
+        xhttp.open( "GET", url + params, true );
+        xhttp.send();
+    }
+</script>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+    </head>
+    <body>
+        <div class="header">
+            <a class="navigateLink" href="@Href("~/Account/Feeds.cshtml?login_username=" + username)">Feed List</a>
+            <a class="logoutLink" href="@Href("~/Account/Logout.cshtml?login_username=" + username)">Logout</a>
+        </div> 
+
+        <div class="content">
+            <div class="FeedList">
+                <div class="feeds">
+                @foreach( var feed in rows ) {
+                    <div class="feed">
+                        <span class="media">
+                            <span id="@feed.id" class="star fa fa-star starred" onclick="toggleStar( this, '@feed.id', '@HttpUtility.JavaScriptStringEncode(feed.title)', '@feed.link', '@feed.numComments', '@feed.media' )"></span>
+                            <img src="@feed.media" />
+                        </span>
+                        <div class="feedTitle"><a href="@feed.link" title="@feed.title">@feed.title</a></div>
+                        <div><label>Number of comments:</label><span>@feed.numComments</span></div>
+                    </div>
+                }
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,123 @@
+html, body {
+    height: 100%;
+}
+
+.header {
+    margin: 10px;
+    clear: both;
+}
+
+.navigateLink {
+    float: left;
+}
+
+.logoutLink {
+    float: right;
+}
+
+.content {
+    clear: both;
+    margin-top: 10px;
+}
+
+#loginCarousel {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 25px;
+    border: 1px solid black;
+    height: 300px;
+}
+
+.loginButtons {
+    height: 30px;
+    border-bottom: 1px solid gray;
+    margin-bottom: 10px;
+}
+
+.error {
+    color:  red;
+}
+
+a:hover {
+    color: gray;
+}
+
+.loginControl {
+    text-align: center;
+}
+
+.container-fluid {
+    padding-top: 10%;
+}
+
+.middleRow {
+    vertical-align: middle;
+}
+
+.carousel-control {
+    position: static;
+    text-shadow: none;
+    opacity: 1;
+    color: blue;
+    font-size: initial;
+}
+
+a.carousel-control:link {
+    color: blue;
+}
+
+a.carousel-control:active, a.carousel-control:hover, {
+    color: #52e6dd;
+}
+
+a.carousel-control:focus{
+    color: gray;
+}
+
+.feedsTitle {
+    font-weight: bold;
+    margin: 10px;
+}
+
+.feedList {
+    width: 45%;
+    float: left;
+    font-family: Verdana;
+    margin: 10px;
+}
+
+.feeds {
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 10px;
+}
+
+.feed{
+    height: 55px;
+    margin: 5px;
+    clear: both;
+}
+
+.media {
+    float:  left;
+}
+
+.feedTitle {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.feed img {
+    height: 50px;
+    width: 50px;
+}
+
+.star {
+    cursor: pointer;
+    cursor:  hand;
+}
+
+.starred {
+    color: gold;
+}
