@@ -48,9 +48,9 @@
         
         var db = Database.Open( "Testsite" );
         var query = "SELECT Username FROM Users WHERE Username=@0";
-        var row = db.Query( query, username );
+        var row = db.QuerySingle( query, username );
 
-        if( row != null ) {
+        if( row != null && row.Username == username ) {
             usernameErrorMessage = "That username already exist.";
             Response.Redirect( "~/Default.cshtml?usernameErrorMessage=" + usernameErrorMessage );
         }
